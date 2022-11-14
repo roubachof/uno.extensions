@@ -1,7 +1,7 @@
 ---
-uid: Overview.Reactive.Rules
+uid: Overview.KeyEquality.Rules
 ---
-# Feeds code analyzers
+# KeyEquality code analyzers
 
 ## KE0001
 **A record eligible to IKeyEquatable generation must be partial.**

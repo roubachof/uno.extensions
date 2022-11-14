@@ -1,7 +1,7 @@
 ---
-uid: Overview.Reactive.Rules
+uid: Overview.PropertySelector.Rules
 ---
-# Feeds code analyzers
+# PropertySelector code analyzers
 
 ## PS0001
 **A property selector can only use property members.**
