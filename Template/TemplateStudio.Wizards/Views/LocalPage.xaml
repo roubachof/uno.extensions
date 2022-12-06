@@ -1,0 +1,103 @@
+﻿<Window x:Class="TemplateStudio.Wizards.Views.LocalPage"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TemplateStudio.Wizards.Views"
+        mc:Ignorable="d"
+		>
+	<!--Title="LocalPage" Height="450" Width="800"-->
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="10*" />
+			<!-- 10% Wizard Header-->
+			<RowDefinition Height="Auto" />
+			<!--Separator-->
+			<RowDefinition Height="90*" />
+			<!--90%-->
+		</Grid.RowDefinitions>
+
+
+		<!--Title-->
+		<TextBlock
+            Grid.Row="0"
+            Margin="10"
+            Text="Title"
+			Foreground="Gray" />
+
+		<Grid Grid.Row="1" Background="Gray" Height="1.5" />
+
+		<Grid Grid.Row="2" >
+			<Grid.RowDefinitions>
+				<RowDefinition Height="9066*" />
+				<!--Main area-->
+				<RowDefinition Height="934*" />
+				<!--Buttons area-->
+			</Grid.RowDefinitions>
+
+			<Grid >
+				<Grid >
+					<Grid.ColumnDefinitions>
+						<!--Sequential flow-->
+						<ColumnDefinition Width="220" />
+						<ColumnDefinition Width="Auto" />
+						<!--Selection area-->
+						<ColumnDefinition Width="*" />
+					</Grid.ColumnDefinitions>
+
+					<ListView
+						x:Name="listViewSequentialFlow"
+						Margin="26,20" 
+						Stylus.IsFlicksEnabled="False"
+						VerticalContentAlignment="Center"
+						SelectionMode="Single"
+						Focusable="False"
+						ItemsSource="{Binding SequentialFlowvViewModel.SequentialFlowList}"
+						SelectedItem="{Binding SequentialFlowvViewModel.SelectSequentialFlow}"
+						>
+						<ListView.ItemTemplate>
+							<DataTemplate>
+								<StackPanel>
+									<TextBlock Text="{Binding Name}"/>
+								</StackPanel>
+							</DataTemplate>
+						</ListView.ItemTemplate>						
+					</ListView>
+
+					<Grid Grid.Column="1" Background="Gray" Height="1.5" />
+					
+					<Frame Grid.Column="2" x:Name="stepFrame" NavigationUIVisibility="Hidden" Focusable="False" />
+
+				</Grid>
+			</Grid>
+
+			<Grid Grid.Row="1">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+				<StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
+					<Button
+						Width="75"
+						Height="23"
+						Content="ButtonCreate"  />
+					<Button
+						Width="75"
+						Height="23"
+						Content="ButtonCancel"  />
+					</StackPanel>
+			</Grid>
+		</Grid>
+
+		<!--Separator--><!--
+		<StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right">
+			<Grid>
+				<Button  Style="{StaticResource TSButtonRestoreWindow}" Command="{Binding Navigation.RestoreCommand}" Visibility="{Binding Navigation.IsMaximized, Converter={StaticResource BoolToVisibilityConverter}}" />
+				<Button  Style="{StaticResource TSButtonMaximizeWindow}" Command="{Binding Navigation.MaximizeCommand}" Visibility="{Binding Navigation.IsMaximized, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=reverse}" />
+			</Grid>
+			<Button  Style="{StaticResource TSButtonCloseWindow}" Command="{Binding Navigation.CancelCommand}" />
+		</StackPanel>-->
+	</Grid>
+
+</Window>

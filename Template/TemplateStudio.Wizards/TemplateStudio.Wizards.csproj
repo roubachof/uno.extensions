@@ -7,14 +7,44 @@
 		<AssemblyOriginatorKeyFile>Keys\key.snk</AssemblyOriginatorKeyFile>
 		<Platforms>AnyCPU;x86;x64</Platforms>
 		<PlatformTarget>AnyCPU</PlatformTarget>
-		<UseWPF>true</UseWPF>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Remove="Views\MainPage.xaml" />
-	  <None Remove="Views\MainUnoPage.xaml" />
+	  <None Remove="Views\SelectPage.xaml" />
 	</ItemGroup>
 
+
+
+	<ItemGroup>
+	  <Page Include="Views\LocalPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Page>
+	  <Page Include="Views\MainPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Page>
+	  <Page Include="Views\MainUnoPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Page>
+	  <Page Include="Views\SelectPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Page>
+	</ItemGroup>
+
+	<ItemGroup>
+
+		<Compile Update="Views\LocalPage.xaml.cs">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Compile>
+		
+		<Compile Update="Views\MainPage.xaml.cs">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Compile>
+
+		<Compile Update="Views\MainUnoPage.xaml.cs">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Compile>
+	</ItemGroup>
+	
 	<ItemGroup>
 		<PackageReference Include="Microsoft.VisualStudio.SDK">
 			<Version>17.1.32210.191</Version>
@@ -23,22 +53,7 @@
 			<Version>17.1.32210.191</Version>
 		</PackageReference>
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Page Include="Views\MainPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </Page>
-	  <Page Include="Views\MainUnoPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </Page>
-	</ItemGroup>
-
 	<ItemGroup>
 	  <Reference Include="System.Data.DataSetExtensions" />
-		<Reference Include="WindowsBase" />
-		<Reference Include="PresentationCore" />
-		<Reference Include="PresentationFramework" />
 	</ItemGroup>
-
-
 </Project>

@@ -5,27 +5,28 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using TemplateStudio.Wizards.Model;
-using TemplateStudio.Wizards.ViewModel;
-using System.Windows.Forms;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+using TemplateStudio.Wizards.Model;
+using TemplateStudio.Wizards.ViewModel;
 
 namespace TemplateStudio.Wizards.Views
 {
-	public partial class MainUnoPage : Window
+	/// <summary>
+	/// Interaction logic for LocalPage.xaml
+	/// </summary>
+	public partial class LocalPage : Window
 	{
-		public ContextViewModel ContextViewModel = null;
-		
-		public MainUnoPage()
+		public SequentialFlowvViewModel SequentialFlowvViewModel { get; set; }
+		public LocalPage()
 		{
-			//UnoHostView.Init(() => MyApp.Wasm.Program.Main(new string[0]), $@"..\..\..\..\MyApp.Wasm\bin\{configuration}\netstandard2.0\dist");
+			SequentialFlowvViewModel = new SequentialFlowvViewModel();
+			SequentialFlowvViewModel.ContentFrame = stepFrame;
+
 			DataContext = this;
 			InitializeComponent();
 		}

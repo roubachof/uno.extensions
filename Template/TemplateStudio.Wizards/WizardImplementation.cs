@@ -65,7 +65,8 @@ namespace TemplateStudio.Wizards
 				//inputForm = new UserInputForm();
 				//inputForm.ShowDialog();
 
-				var page1 = new MainPage();
+				//var page1 = new MainPage();
+				var page1 = new LocalPage();
 				//var page1 = new MainUnoPage();
 				page1.Focus();
 				UI.ShowModal(page1);
@@ -95,7 +96,7 @@ namespace TemplateStudio.Wizards
 			}
 			catch (Exception ex)
 			{
-				//MessageBox.Show(ex.ToString());
+				MessageBox.Show(ex.ToString());
 			}
 		}
 
