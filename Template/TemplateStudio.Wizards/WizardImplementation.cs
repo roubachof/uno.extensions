@@ -28,6 +28,11 @@ namespace TemplateStudio.Wizards
 {
 	public class WizardImplementation : IWizard
 	{
+		public WizardImplementation()
+		{
+			System.Diagnostics.Debugger.Break();
+		}
+
 		// This method is called before opening any item that
 		// has the OpenInEditor attribute.
 		public void BeforeOpeningFile(ProjectItem projectItem)
@@ -54,9 +59,10 @@ namespace TemplateStudio.Wizards
 			Dictionary<string, string> replacementsDictionary,
 			WizardRunKind runKind, object[] customParams)
 		{
+			System.Diagnostics.Debugger.Break();
 			try
 			{
-				
+
 				var host = new WizardHost();
 				host.DataContext = new MainViewModel() { Replacements = replacementsDictionary };
 				UI.ShowModal(host);

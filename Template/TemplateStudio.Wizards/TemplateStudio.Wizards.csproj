@@ -1,13 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net472</TargetFramework>
 		<LangVersion>11.0</LangVersion>
-		<!--<SignAssembly>true</SignAssembly>
-		<AssemblyOriginatorKeyFile>Keys\key.snk</AssemblyOriginatorKeyFile>-->
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>Keys\key.snk</AssemblyOriginatorKeyFile>
 		<Platforms>AnyCPU;x86;x64</Platforms>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<UseWPF>true</UseWPF>
+		<StrongNameKeyFile>$(MSBuildThisFileDirectory)..\TemplateStudio.Wizards\Keys\key.snk</StrongNameKeyFile>
 	</PropertyGroup>
 
 
@@ -17,7 +18,7 @@
 	</ItemGroup>-->
 
 	<ItemGroup>
-		<Page Update="Host\WizardHost.xaml" XamlRuntime="wpf" Generator="MSBuild:Compile" SubType="Designer"/>
+		<Page Update="Host\WizardHost.xaml" XamlRuntime="wpf" Generator="MSBuild:Compile" SubType="Designer" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -26,6 +27,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Brutal.Dev.StrongNameSigner" Version="3.2.0-preview" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.VisualStudio.SDK">
 			<Version>17.1.32210.191</Version>
 		</PackageReference>
@@ -50,4 +52,79 @@
 		<Reference Include="PresentationFramework" />
 	</ItemGroup>
 
+
+
+	<Target Name="PrepareWizard" AfterTargets="AfterResolveReferences" BeforeTargets="StrongNameSignerTarget">
+		<PropertyGroup>
+			<WizardAssemblyUnsignedDir>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)wizard\Unsigned</WizardAssemblyUnsignedDir>
+			<WizardAssemblySignDir>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)wizard\Signed</WizardAssemblySignDir>
+		</PropertyGroup>
+
+		<ItemGroup>
+			<UnsignedReferencePath Include="@(ReferencePath)" />
+			<LocalRefs Include="@(ReferenceCopyLocalPaths)"/>
+		</ItemGroup>
+	</Target>
+	
+	<Target Name="GatherUnsignedWizardFiles" AfterTargets="PrepareWizard" BeforeTargets="StrongNameSignerTarget">
+		<Copy SourceFiles="@(UnsignedReferencePath)" DestinationFolder="$(WizardAssemblyUnsignedDir)" ContinueOnError="false" />
+		<Copy SourceFiles="@(LocalRefs)" DestinationFolder="$(WizardAssemblyUnsignedDir)" ContinueOnError="false" />
+		<ItemGroup>
+			<SymbolFiles Include="$(WizardAssemblyUnsignedDir)\*.pdb" />
+		</ItemGroup>
+		<Delete Files="@(SymbolFiles)" />
+		<ItemGroup>
+			<UpdatedUnsignedReferencePath Include="$(WizardAssemblyUnsignedDir)\*.dll" >
+				<CopyLocal>true</CopyLocal>
+				<CopyToPublishDirectory>true</CopyToPublishDirectory>
+			</UpdatedUnsignedReferencePath>
+		</ItemGroup>
+	</Target>
+	
+	<Target Name="ReplaceReferencePath" AfterTargets="GatherUnsignedWizardFiles" BeforeTargets="StrongNameSignerTarget">
+		<ItemGroup>
+			<ReferencePath Remove="@(UnsignedReferencePath)" />
+			<ReferencePath Include="@(UpdatedUnsignedReferencePath)" />
+			<ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"   />
+			<ReferenceCopyLocalPaths Include="@(UpdatedUnsignedReferencePath)" />
+		</ItemGroup>
+	</Target>
+
+	<Target Name="FixFileLocks" AfterTargets="StrongNameSignerTarget">
+		<PropertyGroup>
+			<LockedFilesDir>$(WizardAssemblyUnsignedDir)\tmp</LockedFilesDir>
+		</PropertyGroup>
+		<ItemGroup>
+			<LockedFiles Include="$(LockedFilesDir)\*.dll" />
+		</ItemGroup>
+		<Copy SourceFiles="@(ReferencePath)" DestinationFolder="$(WizardAssemblyUnsignedDir)" ContinueOnError="false" />
+		<Copy SourceFiles="@(UpdatedUnsignedReferencePath)" DestinationFolder="$(WizardAssemblySignDir)" ContinueOnError="false" />
+		<Copy SourceFiles="@(LockedFiles)" DestinationFolder="$(WizardAssemblySignDir)" ContinueOnError="false" />
+		<ItemGroup>
+			<SignedReferencePath Include="$(WizardAssemblySignDir)\*.dll" >
+				<CopyLocal>true</CopyLocal>
+				<CopyToPublishDirectory>true</CopyToPublishDirectory>
+			</SignedReferencePath>
+
+			<ReferencePath Remove="@(ReferencePath)" />
+			<ReferencePath Include="@(SignedReferencePath)" />
+			<ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"   />
+			<ReferenceCopyLocalPaths Include="@(SignedReferencePath)" />
+		</ItemGroup>
+	</Target>
+
+	<!--<Target Name="FixFileLocks" AfterTargets="StrongNameSignerTarget">
+		<PropertyGroup>
+			<LockedFilesDir>$(WizardAssemblyUnsignedDir)\tmp</LockedFilesDir>
+		</PropertyGroup>
+		<ItemGroup>
+			<LockedFiles Include="$(LockedFilesDir)\*.dll" />
+		</ItemGroup>
+		<Copy SourceFiles="@(LockedFiles)" DestinationFolder="$(WizardAssemblyUnsignedDir)" ContinueOnError="false" />
+	</Target>-->
+
+
+	<!--<Target Name="ThrowErrorAfterSign" AfterTargets="FixFileLocks">
+		<Error Text="Cancel build after signing assemblies" />
+	</Target>-->
 </Project>

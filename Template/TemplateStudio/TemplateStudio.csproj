@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
- <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+	<Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
 
 	<PropertyGroup>
 		<TargetFramework>net472</TargetFramework>
@@ -21,6 +21,8 @@
 		<StartAction>Program</StartAction>
 		<StartProgram Condition="'$(DevEnvDir)' != ''">$(DevEnvDir)devenv.exe</StartProgram>
 		<StartArguments>/rootsuffix Exp</StartArguments>
+		<!--<StrongNameKeyFile>$(MSBuildThisFileDirectory)..\TemplateStudio.Wizards\Keys\key.snk</StrongNameKeyFile>-->
+
 	</PropertyGroup>
 
 
@@ -33,15 +35,16 @@
 			<SubType>Designer</SubType>
 		</None>
 	</ItemGroup>
-	
+
 	<ItemGroup>
 		<PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.1.32210.191" ExcludeAssets="runtime" />
 		<PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.4.2118" />
-		<PackageReference Include="Brutal.Dev.StrongNameSigner" Version="3.1.1" PrivateAssets="all" />
+		<!--<PackageReference Include="Brutal.Dev.StrongNameSigner" Version="3.2.0-preview" PrivateAssets="all" />-->
 		<WizardTemplatePackage Include="Uno.Extensions.Templates" Version="2.3.0-dev.394" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\TemplateStudio.Wizards\TemplateStudio.Wizards.csproj" />
 		<ProjectReference Include="..\UnoProjectTemplate\UnoProjectTemplate.csproj">
 			<Project>{BBB7197B-CB92-4B49-B89B-1F322B7F71A3}</Project>
 			<Name>UnoProjectTemplate</Name>
@@ -50,55 +53,120 @@
 			<IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
 		</ProjectReference>
 	</ItemGroup>
-	
+
 	<Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 	<Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
 
 
+	<Target Name="PrepareWizard" AfterTargets="AfterResolveReferences" BeforeTargets="StrongNameSignerTarget">
+		<PropertyGroup>
+			<WizardAssemblySignDir>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)wizard\Signed</WizardAssemblySignDir>
+			<WizardFilesDir>$(MSBuildProjectDirectory)\..\TemplateStudio.Wizards\obj\$(Configuration)\net472\wizard\Signed</WizardFilesDir>
+		</PropertyGroup>
 
-	<!-- Step 1... Build the Wizard -->
-	<Target Name="PrepareWizard" AfterTargets="BeforeBuild">
+		<ItemGroup>
+			<DebugReferencePath Include="@(ReferencePath)"/>
+			<DebugReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths)"/>
+
+			<ProjectReferencePath Include="@(ReferencePath)" Condition="'%(ReferencePath.ReferenceSourceTarget)' == 'ProjectReference'"/>
+			<ProjectReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.ReferenceSourceTarget)' == 'ProjectReference'"/>
+			<UnsignedReferencePath Include="@(ReferencePath)" Condition="'%(ReferencePath.ReferenceSourceTarget)' != 'ProjectReference'"/>
+			<UnsignedReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.ReferenceSourceTarget)' != 'ProjectReference'"/>
+			<WizardFiles Include="$(WizardFilesDir)\**\*.*">
+				<CopyLocal>true</CopyLocal>
+			</WizardFiles>
+		</ItemGroup>
+	</Target>
+
+	<Target Name="GatherUnsignedWizardFiles" AfterTargets="PrepareWizard" BeforeTargets="StrongNameSignerTarget">
+		<Copy SourceFiles="@(UnsignedReferencePath)" DestinationFolder="$(WizardAssemblySignDir)\%(RecursiveDir)" ContinueOnError="false" />
+		<Copy SourceFiles="@(UnsignedReferenceCopyLocalPaths)" DestinationFolder="$(WizardAssemblySignDir)\%(RecursiveDir)" ContinueOnError="false" />
+		<Copy SourceFiles="@(WizardFiles)" DestinationFolder="$(WizardAssemblySignDir)\%(RecursiveDir)" ContinueOnError="false" />
+		<ItemGroup>
+			<SignedReferencePath Include="$(WizardAssemblySignDir)\*.dll" />
+		</ItemGroup>
+	</Target>
+
+	<Target Name="ReplaceReferencePath" AfterTargets="GatherUnsignedWizardFiles" BeforeTargets="StrongNameSignerTarget">
+		<ItemGroup>
+			<ReferencePath Remove="@(ReferencePath)" />
+			<ReferencePath Include="@(SignedReferencePath)" />
+			<ReferencePath Include="@(ProjectReferencePath)" />
+			<ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"/>
+			<ReferenceCopyLocalPaths Include="@(SignedReferencePath)" />
+			<ReferenceCopyLocalPaths Include="@(ProjectReferenceCopyLocalPaths)" />
+		</ItemGroup>
+
+		<ItemGroup>
+			<!--<WizardContent Include="$(WizardAssemblySignDir)\**\*.dll" />
+			<WizardContent Include="$(WizardAssemblySignDir)\**\*.pdb" />-->
+			<WizardContent Include="$(WizardAssemblySignDir)\**\*.dylib" />
+
+			<Content Include="$(WizardContent)">
+				<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+				<IncludeInVSIX>true</IncludeInVSIX>
+			</Content>
+		</ItemGroup>
+	</Target>
+
+	<!--<Target Name="PrepareWizard" AfterTargets="AfterResolveReferences" BeforeTargets="StrongNameSignerTarget">
 		<PropertyGroup>
 			<WizardAssemblyUnsignedDir>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)wizard\Unsigned</WizardAssemblyUnsignedDir>
 			<WizardAssemblySignDir>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)wizard\Signed</WizardAssemblySignDir>
 		</PropertyGroup>
+
 		<ItemGroup>
-			<WizardProjectReference Include="$(SolutionDir)\TemplateStudio.Wizards\TemplateStudio.Wizards.csproj" />
+			<UnsignedReferencePath Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetSourceType)' == 'Package'">
+				<CopyLocal>true</CopyLocal>
+			</UnsignedReferencePath>
 		</ItemGroup>
-		<MSBuild Projects="@(WizardProjectReference)" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
 	</Target>
 
-	<!-- Step 2... Gather the required files and copy to a temporary directory -->
-	<Target Name="GatherUnsignedWizardFiles" AfterTargets="PrepareWizard">
+	<Target Name="GatherUnsignedWizardFiles" AfterTargets="PrepareWizard" BeforeTargets="StrongNameSignerTarget">
+		<Copy SourceFiles="@(UnsignedReferencePath)" DestinationFolder="$(WizardAssemblyUnsignedDir)" ContinueOnError="false" />
 		<ItemGroup>
-			<WizardDylib Include="$(SolutionDir)\TemplateStudio.Wizards\bin\$(Configuration)\net472\**\*.dylib" />
-			<WizardDLL Include="$(SolutionDir)\TemplateStudio.Wizards\bin\$(Configuration)\net472\**\*.dll" />
-			<!--<WizardDLL Include="$(SolutionDir)\TemplateStudio.Wizards\bin\$(Configuration)\net472\*\*.dll" />-->
-			<UnsignedWizardAssembly Include="$(SolutionDir)\TemplateStudio.Wizards\bin\$(Configuration)\net472\**\*.dll" />
-			<UnsignedWizardAssembly Include="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\netstandard.dll" />
-			<UnsignedWizardAssembly Include="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\msc*.dll" />
-			<UnsignedWizardAssembly Include="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System*.dll" />
+			<SignedReferencePath Include="$(WizardAssemblyUnsignedDir)\*.dll" />
 		</ItemGroup>
-		<Copy SourceFiles="@(UnsignedWizardAssembly)" DestinationFolder="$(WizardAssemblyUnsignedDir)\%(RecursiveDir)" ContinueOnError="false" />
-		<Copy SourceFiles="@(WizardDylib)" DestinationFolder="$(WizardAssemblySignDir)\%(RecursiveDir)" ContinueOnError="false" />
-		<Copy SourceFiles="@(WizardDLL)" DestinationFolder="$(WizardAssemblySignDir)\%(RecursiveDir)" ContinueOnError="false" />
 	</Target>
+
+	<Target Name="ReplaceReferencePath" AfterTargets="GatherUnsignedWizardFiles" BeforeTargets="StrongNameSignerTarget">
+		<ItemGroup>
+			<ReferencePath Remove="@(UnsignedReferencePath)" />
+			<ReferencePath Include="@(SignedReferencePath)" />
+			<ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"  Condition="'%(ReferenceCopyLocalPaths.NuGetSourceType)' == 'Package'" />
+			<ReferenceCopyLocalPaths Include="@(SignedReferencePath)" />
+		</ItemGroup>
+		
+		<ItemGroup>
+			<WizardContent Include="$(WizardAssemblyUnsignedDir)\**\*.dll" />
+
+			<Content Include="$(WizardContent)">
+				<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+				<IncludeInVSIX>true</IncludeInVSIX>
+			</Content>
+		</ItemGroup>
+	</Target>-->
 
 	<!-- Step 3... Sign the files -->
+	<!--
 	<Target Name="SignWizardFiles" AfterTargets="GatherUnsignedWizardFiles">
 		<MakeDir Directories="$(WizardAssemblySignDir)" />
 		<Exec ContinueOnError="false" Command="&quot;$(StrongNameSignerDirectory)StrongNameSigner.Console.exe&quot; -in &quot;$(WizardAssemblyUnsignedDir)&quot; -out &quot;$(WizardAssemblySignDir)&quot; -k &quot;$(SolutionDir)TemplateStudio.Wizards\keys\key.snk&quot;" />
 	</Target>
 
+	-->
 	<!-- Step 4... Add the signed files to the project -->
+	<!--
 	<Target Name="ReferenceWizardAssemblies" AfterTargets="SignWizardFiles">
 		<ItemGroup>
 			<SignedWizardAssembly Include="$(WizardAssemblySignDir)\**\*.dll" />
 			<SignedWizardAssembly Include="$(WizardAssemblySignDir)\**\*.dylib" />
-			<!--<SignedWizardAssembly Include="$(WizardAssemblySignDir)\**\Uno*.dll" />
+			-->
+	<!--<SignedWizardAssembly Include="$(WizardAssemblySignDir)\**\Uno*.dll" />
 			<SignedWizardAssembly Include="$(WizardAssemblySignDir)\**\HarfBuzzSharp*.dll" />
 			<SignedWizardAssembly Include="$(WizardAssemblySignDir)\**\SkiaSharp*.dll" />
 			<SignedWizardAssembly Include="$(WizardAssemblySignDir)\**\TemplateStudio.Wizards.dll" />-->
+	<!--
 
 			<Reference Include="@(SignedWizardAssembly)">
 				<HintPath>$(OutputPath)%(Filename)%(Extension)</HintPath>
@@ -114,18 +182,14 @@
 				<IncludeInVSIX>true</IncludeInVSIX>
 			</Content>
 		</ItemGroup>
-	</Target>
+	</Target>-->
 
-	<Target Name="DownloadTemplateNuGet"
-					BeforeTargets="PrepareWizard">
+	<Target Name="DownloadTemplateNuGet" BeforeTargets="PrepareWizard">
 		<MakeDir Directories="Templates" />
-		<DownloadFile DestinationFolder="Templates"
-									SourceUrl="https://www.nuget.org/api/v2/package/%(WizardTemplatePackage.Identity)/%(WizardTemplatePackage.Version)"
-									SkipUnchangedFiles="true" />
+		<DownloadFile DestinationFolder="Templates" SourceUrl="https://www.nuget.org/api/v2/package/%(WizardTemplatePackage.Identity)/%(WizardTemplatePackage.Version)" SkipUnchangedFiles="true" />
 	</Target>
 
-	<Target Name="BundleTemplates"
-					AfterTargets="DownloadTemplateNuGet">
+	<Target Name="BundleTemplates" AfterTargets="DownloadTemplateNuGet">
 		<ItemGroup>
 			<Content Include="Templates\*.nupkg">
 				<CopyToOutputDirectory>Always</CopyToOutputDirectory>
