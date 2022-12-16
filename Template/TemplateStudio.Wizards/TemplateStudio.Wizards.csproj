@@ -58,6 +58,7 @@
 		<PropertyGroup>
 			<WizardAssemblyUnsignedDir>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)wizard\Unsigned</WizardAssemblyUnsignedDir>
 			<WizardAssemblySignDir>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)wizard\Signed</WizardAssemblySignDir>
+			<SignerOutputDirectory>$(WizardAssemblySignDir)</SignerOutputDirectory>
 		</PropertyGroup>
 
 		<ItemGroup>
@@ -69,10 +70,12 @@
 	<Target Name="GatherUnsignedWizardFiles" AfterTargets="PrepareWizard" BeforeTargets="StrongNameSignerTarget">
 		<Copy SourceFiles="@(UnsignedReferencePath)" DestinationFolder="$(WizardAssemblyUnsignedDir)" ContinueOnError="false" />
 		<Copy SourceFiles="@(LocalRefs)" DestinationFolder="$(WizardAssemblyUnsignedDir)" ContinueOnError="false" />
+		<Copy SourceFiles="@(UnsignedReferencePath)" DestinationFolder="$(WizardAssemblySignDir)" ContinueOnError="false" />
+		<Copy SourceFiles="@(LocalRefs)" DestinationFolder="$(WizardAssemblySignDir)" ContinueOnError="false" />
 		<ItemGroup>
 			<SymbolFiles Include="$(WizardAssemblyUnsignedDir)\*.pdb" />
 		</ItemGroup>
-		<Delete Files="@(SymbolFiles)" />
+		<!--<Delete Files="@(SymbolFiles)" />-->
 		<ItemGroup>
 			<UpdatedUnsignedReferencePath Include="$(WizardAssemblyUnsignedDir)\*.dll" >
 				<CopyLocal>true</CopyLocal>
@@ -91,15 +94,6 @@
 	</Target>
 
 	<Target Name="FixFileLocks" AfterTargets="StrongNameSignerTarget">
-		<PropertyGroup>
-			<LockedFilesDir>$(WizardAssemblyUnsignedDir)\tmp</LockedFilesDir>
-		</PropertyGroup>
-		<ItemGroup>
-			<LockedFiles Include="$(LockedFilesDir)\*.dll" />
-		</ItemGroup>
-		<Copy SourceFiles="@(ReferencePath)" DestinationFolder="$(WizardAssemblyUnsignedDir)" ContinueOnError="false" />
-		<Copy SourceFiles="@(UpdatedUnsignedReferencePath)" DestinationFolder="$(WizardAssemblySignDir)" ContinueOnError="false" />
-		<Copy SourceFiles="@(LockedFiles)" DestinationFolder="$(WizardAssemblySignDir)" ContinueOnError="false" />
 		<ItemGroup>
 			<SignedReferencePath Include="$(WizardAssemblySignDir)\*.dll" >
 				<CopyLocal>true</CopyLocal>
