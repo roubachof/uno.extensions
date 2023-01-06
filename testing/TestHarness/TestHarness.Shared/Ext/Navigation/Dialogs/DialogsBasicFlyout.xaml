@@ -4,13 +4,28 @@
 	  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	  mc:Ignorable="d"
+	  xmlns:utu="using:Uno.Toolkit.UI"
 	  xmlns:uen="using:Uno.Extensions.Navigation.UI"
 	  Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
 
 	<Grid>
-		<TextBlock Text="Shown in Flyout" />
-		<StackPanel VerticalAlignment="Bottom">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+		</Grid.RowDefinitions>
+		<utu:NavigationBar Content="Flyout Content"
+						   AutomationProperties.AutomationId="DialogsContentDialogsPage">
+			<utu:NavigationBar.PrimaryCommands>
+				<AppBarButton uen:Navigation.Request="-">
+					<AppBarButton.Icon>
+						<BitmapIcon ShowAsMonochrome="False"
+									UriSource="ms-appx:///Assets/Icons/close.png" />
+					</AppBarButton.Icon>
+				</AppBarButton>
+			</utu:NavigationBar.PrimaryCommands>
+		</utu:NavigationBar>
+		<StackPanel VerticalAlignment="Bottom" Grid.Row="1">
 			<Button Content="Close from XAML"
 					uen:Navigation.Request="-" />
 			<Button Content="Close from ViewModel"
