@@ -14,4 +14,7 @@ public sealed partial class PageNavigationOnePage : Page
 		await this.Navigator()!.NavigateViewAsync<PageNavigationTwoPage>(this);
 	}
 
+	public void DontNavigationButtonClick(object sender, RoutedEventArgs e)
+	{
+	}
 }
