@@ -21,6 +21,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<InternalsVisibleTo Include="TestHarnessApp" />
+		<InternalsVisibleTo Include="TestHarness" />
 	</ItemGroup>
 </Project>

@@ -1,13 +1,14 @@
-namespace TestHarness.Wasm;
-
-public class Program
+namespace TestHarness.Wasm
 {
-	private static App? _app;
+    public class Program
+    {
+        private static App? _app;
 
-	static int Main(string[] args)
-	{
-		Microsoft.UI.Xaml.Application.Start(_ => _app = new App());
+        public static int Main(string[] args)
+        {
+            Microsoft.UI.Xaml.Application.Start(_ => _app = new AppHead());
 
-		return 0;
-	}
+            return 0;
+        }
+    }
 }

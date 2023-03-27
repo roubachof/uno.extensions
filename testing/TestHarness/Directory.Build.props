@@ -1,15 +1,16 @@
 <Project ToolsVersion="15.0">
+	<Import Project="..\..\Directory.Build.props" />
+
 	<PropertyGroup>
 		<LangVersion>10.0</LangVersion>
 		<Nullable>enable</Nullable>
-		<NoWarn>$(NoWarn);NU5104;NU1504;NU1505;CS1591;MSB3277;XA0101;CS8785;CS8669;CA1416</NoWarn>
+		<NoWarn>$(NoWarn);NU5104;NU1504;NU1505;CS1591;MSB3277;XA0101;CS8785;CS8669;CA1416;UNOB0002</NoWarn>
 		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 		
 		<ConditionalCompilationSymbols>
 			<ConditionalCompilationSymbol Name="UNO_EXT_TIMERS" Comment="Controls whether performance timers are enabled (off by default)" />
 		</ConditionalCompilationSymbols>
 
-		
 		<!--<DefineConstants>$(DefineConstants);UNO_EXT_TIMERS</DefineConstants>-->
 	</PropertyGroup>
 
@@ -19,8 +20,16 @@
 		<SynthesizeLinkMetadata>true</SynthesizeLinkMetadata>
 		<RootNamespace>TestHarness</RootNamespace>
 		<ImplicitUsings>enable</ImplicitUsings>
+
+		
+		<IsAndroid>false</IsAndroid>
+		<IsIOS>false</IsIOS>
+		<IsMac>false</IsMac>
+		<IsMacCatalyst>false</IsMacCatalyst>
+		<IsWinAppSdk>false</IsWinAppSdk>
 	</PropertyGroup>
 
+	<!-- TODO: Remove this list and migrate to using the IsXYZ platform identifiers specified above -->
 	<PropertyGroup>
 		<IsMonoAndroid>false</IsMonoAndroid>
 		<IsMonoAndroid Condition="'$(TargetFramework)'=='net6.0-android' or $(TargetFramework.ToLower().StartsWith('monoandroid'))">true</IsMonoAndroid>
@@ -58,6 +67,43 @@
 		<_IsWinUI>false</_IsWinUI>
 		<_IsWinUI Condition="$(TargetFramework.Contains('windows10'))">true</_IsWinUI>
 	</PropertyGroup>
+
+	<Choose>
+		<When Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+			<PropertyGroup>
+				<IsAndroid>true</IsAndroid>
+				<SupportedOSPlatformVersion>21.0</SupportedOSPlatformVersion>
+			</PropertyGroup>
+		</When>
+		<When Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
+			<PropertyGroup>
+				<IsIOS>true</IsIOS>
+				<SupportedOSPlatformVersion>14.2</SupportedOSPlatformVersion>
+				<RuntimeIdentifier Condition="'$(RuntimeIdentifier)'==''">iossimulator-x64</RuntimeIdentifier>
+			</PropertyGroup>
+		</When>
+		<When Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'macos'">
+			<PropertyGroup>
+				<IsMac>true</IsMac>
+				<SupportedOSPlatformVersion>10.14</SupportedOSPlatformVersion>
+				<RuntimeIdentifier Condition="'$(RuntimeIdentifier)'==''">osx-x64</RuntimeIdentifier>
+			</PropertyGroup>
+		</When>
+		<When Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
+			<PropertyGroup>
+				<IsMacCatalyst>true</IsMacCatalyst>
+				<SupportedOSPlatformVersion>14.0</SupportedOSPlatformVersion>
+				<RuntimeIdentifier Condition="'$(RuntimeIdentifier)'==''">maccatalyst-x64</RuntimeIdentifier>
+			</PropertyGroup>
+		</When>
+		<When Condition="$(TargetFramework.Contains('windows10'))">
+			<PropertyGroup>
+				<IsWinAppSdk>true</IsWinAppSdk>
+				<SupportedOSPlatformVersion>10.0.18362.0</SupportedOSPlatformVersion>
+				<TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
+			</PropertyGroup>
+		</When>
+	</Choose>
 
 
 	<PropertyGroup Condition="'$(_IsIOS)' == 'true'">

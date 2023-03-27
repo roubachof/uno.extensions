@@ -1,0 +1,140 @@
+﻿<Project Sdk="MSBuild.Sdk.Extras" ToolsVersion="15.0">
+	<Import Project="..\..\..\src\tfms-ui-winui.props" />
+	<PropertyGroup>
+		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows')) or '$(EnableWindowsTargeting)' == 'true'">$(TargetFrameworks);net7.0-windows10.0.19041</TargetFrameworks>
+		<TargetFrameworks>$(TargetFrameworks);net7.0;net7.0-ios;net7.0-android;net7.0-maccatalyst</TargetFrameworks>-->
+
+		<!-- Ensures the .xr.xml files are generated in a proper layout folder -->
+		<GenerateLibraryLayout>true</GenerateLibraryLayout>
+		<DefineConstants>$(DefineConstants);WINUI</DefineConstants>
+		<UnoExtensionsGeneration_DisableNotNullIfNotNullAttribute>true</UnoExtensionsGeneration_DisableNotNullIfNotNullAttribute>
+		<DefaultLanguage>en</DefaultLanguage>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Mvvm" />
+		<PackageReference Include="Uno.Dsp.Tasks" />
+		<PackageReference Include="Uno.WinUI" />
+		<PackageReference Include="Uno.Resizetizer" />
+		<PackageReference Include="Uno.Material.WinUI" />
+		<PackageReference Include="Uno.Toolkit.WinUI.Material" />
+		<PackageReference Include="Uno.Toolkit.WinUI" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Authentication.Oidc\Uno.Extensions.Authentication.Oidc.WinUI.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Authentication\Uno.Extensions.Authentication.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Authentication.UI\Uno.Extensions.Authentication.WinUI.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Authentication.Msal\Uno.Extensions.Authentication.Msal.WinUI.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Configuration\Uno.Extensions.Configuration.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Localization.UI\Uno.Extensions.Localization.WinUI.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Core\Uno.Extensions.Core.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Core.Generators\Uno.Extensions.Core.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Hosting.UI\Uno.Extensions.Hosting.WinUI.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Hosting\Uno.Extensions.Hosting.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Logging.Serilog\Uno.Extensions.Logging.Serilog.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Logging\Uno.Extensions.Logging.WinUI.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Navigation.Toolkit\Uno.Extensions.Navigation.Toolkit.WinUI.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Navigation.UI\Uno.Extensions.Navigation.WinUI.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Navigation\Uno.Extensions.Navigation.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Reactive.UI\Uno.Extensions.Reactive.WinUI.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Reactive\Uno.Extensions.Reactive.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Reactive.Generator\Uno.Extensions.Reactive.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Serialization.Http\Uno.Extensions.Serialization.Http.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Serialization.Refit\Uno.Extensions.Serialization.Refit.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Serialization\Uno.Extensions.Serialization.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Http\Uno.Extensions.Http.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Http.Refit\Uno.Extensions.Http.Refit.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Validation\Uno.Extensions.Validation.csproj" />
+		<ProjectReference Include="..\..\..\src\Uno.Extensions.Validation.Fluent\Uno.Extensions.Validation.Fluent.csproj" />
+		<ProjectReference Include="..\TestHarness.Core\TestHarness.Core.csproj" />
+	</ItemGroup>
+
+	<Choose>
+		<When Condition="$(IsWinAppSdk)">
+			<PropertyGroup>
+				<RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
+			</PropertyGroup>
+			<ItemGroup>
+				<PackageReference Include="Microsoft.WindowsAppSDK" />
+				<PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
+			</ItemGroup>
+
+			<ItemGroup>
+				<!--
+				If you encounter this error message:
+
+					error NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll.
+					Please update to a newer .NET SDK in order to reference this assembly.
+
+				This means that the two packages below must be aligned with the "build" version number of
+				the "Microsoft.Windows.SDK.BuildTools" package above, and the "revision" version number
+				must be the highest found in https://www.nuget.org/packages/Microsoft.Windows.SDK.NET.Ref.
+				-->
+				<!-- <FrameworkReference Update="Microsoft.Windows.SDK.NET.Ref" RuntimeFrameworkVersion="10.0.22621.28" />
+				<FrameworkReference Update="Microsoft.Windows.SDK.NET.Ref" TargetingPackVersion="10.0.22621.28" /> -->
+			</ItemGroup>
+		</When>
+		<Otherwise>
+			<ItemGroup>
+				<Content Include="Assets\**" />
+				<Page Include="**\*.xaml" Exclude="bin\**\*.xaml;obj\**\*.xaml" />
+				<Compile Update="**\*.xaml.cs">
+					<DependentUpon>%(Filename)</DependentUpon>
+				</Compile>
+				<PRIResource Include="**/*.resw"/>
+			</ItemGroup>
+		</Otherwise>
+	</Choose>
+
+	<ItemGroup>
+		<!--<UnoDspImportColors Include="Styles\*.zip" Generator="Xaml" />
+		<UnoImage Include="Assets\**\*.svg" />
+		<EmbeddedResource Include="appsettings.*.json" DependentUpon="appsettings.json" />-->
+		<UpToDateCheckInput Include="**\*.xaml" Exclude="bin\**\*.xaml;obj\**\*.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Ext\AdHoc\data.json" />
+	  <None Remove="Ext\Authentication\Custom\appsettings.dummyjson.json" />
+	  <None Remove="Ext\Authentication\Custom\appsettings.testbackend.json" />
+	  <None Remove="Ext\Authentication\Msal\appsettings.msal.json" />
+	  <None Remove="Ext\Authentication\Msal\appsettings.msalauthentication.json" />
+	  <None Remove="Ext\Authentication\Msal\appsettings.multi.json" />
+	  <None Remove="Ext\Authentication\Oidc\appsettings.oidc.json" />
+	  <None Remove="Ext\Authentication\Web\appsettings.webauth.json" />
+	  <None Remove="Ext\Authentication\Web\appsettings.webauthsettings.json" />
+	  <None Remove="Ext\Core\Storage\appsettings.storage.json" />
+	  <None Remove="Ext\Http\Endpoints\appsettings.httpendpoints.json" />
+	  <None Remove="Ext\Http\Refit\appsettings.httprefit.json" />
+	  <None Remove="Ext\Localization\appsettings.locale.json" />
+	  <None Remove="Ext\Navigation\Apps\Commerce\appsettings.logging.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Ext\AdHoc\data.json" />
+	  <EmbeddedResource Include="Ext\Authentication\Custom\appsettings.dummyjson.json" />
+	  <EmbeddedResource Include="Ext\Authentication\Custom\appsettings.testbackend.json" />
+	  <EmbeddedResource Include="Ext\Authentication\Msal\appsettings.msal.json" />
+	  <EmbeddedResource Include="Ext\Authentication\Msal\appsettings.msalauthentication.json" />
+	  <EmbeddedResource Include="Ext\Authentication\Msal\appsettings.multi.json" />
+	  <EmbeddedResource Include="Ext\Authentication\Oidc\appsettings.oidc.json" />
+	  <EmbeddedResource Include="Ext\Authentication\Web\appsettings.webauth.json" />
+	  <EmbeddedResource Include="Ext\Authentication\Web\appsettings.webauthsettings.json" />
+	  <EmbeddedResource Include="Ext\Core\Storage\appsettings.storage.json" />
+	  <EmbeddedResource Include="Ext\Http\Endpoints\appsettings.httpendpoints.json" />
+	  <EmbeddedResource Include="Ext\Http\Refit\appsettings.httprefit.json" />
+	  <EmbeddedResource Include="Ext\Localization\appsettings.locale.json" />
+	  <EmbeddedResource Include="Ext\Navigation\Apps\Commerce\appsettings.logging.json" />
+	</ItemGroup>
+
+	<!--<ItemGroup>
+	  <EmbeddedResource Remove="appsettings.development.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="appsettings.development.json" />
+	</ItemGroup>-->
+	<Import Project="..\..\..\src\Uno.Extensions.Core.Generators\buildTransitive\Uno.Extensions.Core.props" />
+</Project>
