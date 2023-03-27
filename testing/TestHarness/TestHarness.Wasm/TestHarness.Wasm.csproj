@@ -99,6 +99,5 @@
 		<ProjectReference Include="..\..\..\src\Uno.Extensions.Validation.Fluent\Uno.Extensions.Validation.Fluent.csproj" />
 		<ProjectReference Include="..\TestHarness.Core\TestHarness.Core.csproj" />
 	</ItemGroup>
-	<Import Project="..\..\..\src\Uno.Extensions.Core.Generators\buildTransitive\Uno.Extensions.Core.props" />
 	<Import Project="..\TestHarness.Shared\TestHarness.Shared.projitems" Label="Shared" Condition="Exists('..\TestHarness.Shared\TestHarness.Shared.projitems')" />
 </Project>
